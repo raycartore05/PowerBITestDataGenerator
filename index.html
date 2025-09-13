@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bank Test Data Generator - Philippines</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+        }
+        .controls {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: center;
+        }
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        label {
+            font-weight: bold;
+            color: #555;
+            font-size: 0.9em;
+        }
+        input, select {
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        input:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+        }
+        button:active {
+            transform: translateY(0);
+        }
+        #downloadBtn {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            margin-left: 10px;
+        }
+        #downloadBtn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .preview {
+            margin-top: 30px;
+            overflow-x: auto;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px;
+        }
+        th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px 8px;
+            text-align: left;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        td {
+            padding: 8px;
+            border-bottom: 1px solid #eee;
+        }
+        tr:hover {
+            background-color: #f8f9ff;
+        }
+        .stats {
+            display: flex;
+            gap: 20px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 10px;
+            text-align: center;
+            min-width: 150px;
+        }
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+        }
+        .stat-label {
+            font-size: 12px;
+            opacity: 0.9;
+            margin-top: 5px;
+        }
+        .info-box {
+            background: #f8f9ff;
+            border-left: 4px solid #667eea;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+        }
+        .info-box h3 {
+            margin: 0 0 10px 0;
+            color: #667eea;
+        }
+        .info-box p {
+            margin: 5px 0;
+            color: #666;
+            font-size: 14px;
+        }
+        .rules-box {
+            background: #fff4e5;
+            border-left: 4px solid #ff9800;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+        }
+        .rules-box h3 {
+            margin: 0 0 10px 0;
+            color: #ff9800;
+        }
+        .rules-box ul {
+            margin: 5px 0;
+            padding-left: 20px;
+        }
+        .rules-box li {
+            color: #666;
+            font-size: 13px;
+            margin: 3px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏦 Bank Test Data Generator</h1>
+        <p class="subtitle">Philippine Banking System Test Manager Tool</p>
+        
+        <div class="info-box">
+            <h3>ℹ️ Instructions</h3>
+            <p>• This tool generates test data following Philippine banking standards</p>
+            <p>• All customer information uses realistic Filipino names and locations</p>
+            <p>• Data validation rules are automatically applied based on field dependencies</p>
+            <p>• Generated data includes proper regional alignment for cities and provinces</p>
+        </div>
+
+        <div class="rules-box">
+            <h3>⚠️ Business Rules Applied</h3>
+            <ul>
+                <li><strong>Fraud Detection:</strong> Closed (C) and Dormant (D) accounts are automatically flagged as fraud (FRAUD_FLAG = 1)</li>
+                <li><strong>Card Creation:</strong> All cards created after January 1, 2015</li>
+                <li><strong>Card Expiry:</strong> Must be after creation date AND after January 1, 2026</li>
+                <li><strong>Transaction Amount:</strong> Displayed in currency format with 2 decimal places matching CURC01 codes</li>
+                <li><strong>Currency Mapping:</strong> 608=PHP(₱), 609=USD($), 610=EUR(€), 611=JPY(¥), 612=CNY(¥)</li>
+            </ul>
+        </div>
+
+        <div class="controls">
+            <div class="control-group">
+                <label for="numRows">Number of Records:</label>
+                <input type="number" id="numRows" value="100" min="1" max="10000">
+            </div>
+            <div class="control-group">
+                <label for="fraudRate">Fraud Rate % (Active Accounts Only):</label>
+                <input type="number" id="fraudRate" value="5" min="0" max="100">
+            </div>
+            <div class="control-group">
+                <label for="uniqueCustomers">Unique Customers:</label>
+                <input type="number" id="uniqueCustomers" value="50" min="1" max="5000">
+            </div>
+            <button onclick="generateData()">Generate Test Data</button>
+            <button id="downloadBtn" onclick="downloadExcel()" disabled>Download Excel</button>
+        </div>
+
+        <div class="stats" id="stats" style="display: none;">
+            <div class="stat-card">
+                <div class="stat-value" id="totalRecords">0</div>
+                <div class="stat-label">Total Records</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="uniqueCustomersCount">0</div>
+                <div class="stat-label">Unique Customers</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="fraudCount">0</div>
+                <div class="stat-label">Fraud Cases</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="activeAccounts">0</div>
+                <div class="stat-label">Active Accounts</div>
+            </div>
+        </div>
+
+        <div class="preview" id="preview"></div>
+    </div>
+
+    <script>
+        let generatedData = [];
+
+        // Filipino names database
+        const filipinoFirstNames = {
+            male: ['Juan', 'Jose', 'Antonio', 'Manuel', 'Francisco', 'Miguel', 'Angelo', 'Carlos', 'Roberto', 'Eduardo', 
+                   'Ricardo', 'Daniel', 'Gabriel', 'Rafael', 'Alejandro', 'Diego', 'Fernando', 'Luis', 'Pedro', 'Ramon',
+                   'Rodrigo', 'Sergio', 'Vicente', 'Albert', 'Benedict', 'Christian', 'Dennis', 'Emmanuel', 'Francis', 'Gerald',
+                   'Harold', 'Ian', 'James', 'Kenneth', 'Lawrence', 'Mark', 'Nathan', 'Oliver', 'Patrick', 'Quincy'],
+            female: ['Maria', 'Ana', 'Rosa', 'Carmen', 'Isabel', 'Teresa', 'Patricia', 'Gloria', 'Elena', 'Laura',
+                     'Sofia', 'Lucia', 'Andrea', 'Beatriz', 'Clara', 'Diana', 'Emma', 'Fatima', 'Grace', 'Hannah',
+                     'Irene', 'Julia', 'Karen', 'Lourdes', 'Michelle', 'Nicole', 'Olivia', 'Paula', 'Rachel', 'Sandra',
+                     'Tiffany', 'Victoria', 'Wendy', 'Xyza', 'Yasmin', 'Zara', 'Angel', 'Belle', 'Charm', 'Divine']
+        };
+
+        const filipinoSurnames = ['Santos', 'Reyes', 'Cruz', 'Garcia', 'Mendoza', 'Torres', 'Flores', 'Gonzales', 'Ramos', 'Lopez',
+                                  'Dela Cruz', 'Del Rosario', 'Bautista', 'Gonzalez', 'Hernandez', 'Villanueva', 'Castillo', 'Francisco', 'Rivera', 'Domingo',
+                                  'De Leon', 'Martinez', 'Rodriguez', 'Santiago', 'Soriano', 'Aquino', 'Miranda', 'Fernandez', 'Mercado', 'Tan',
+                                  'Lim', 'Chua', 'Ong', 'Sy', 'Co', 'Yap', 'Lee', 'Wong', 'Chen', 'Uy'];
+
+        // Philippine regions and cities
+        const regionCityMap = {
+            'National Capital Region (NCR)': ['Manila', 'Quezon City', 'Makati', 'Pasig', 'Taguig', 'Paranaque', 'Pasay', 'Marikina', 'Muntinlupa', 'Las Pinas'],
+            'Ilocos Region (Region I)': ['Laoag', 'Vigan', 'San Fernando', 'Dagupan', 'Alaminos', 'Batac', 'Candon', 'San Carlos', 'Urdaneta'],
+            'Cagayan Valley (Region II)': ['Tuguegarao', 'Santiago', 'Cauayan', 'Ilagan', 'Aparri', 'Bayombong', 'Solano', 'Bambang'],
+            'Central Luzon (Region III)': ['Angeles', 'San Fernando', 'Malolos', 'Meycauayan', 'San Jose del Monte', 'Cabanatuan', 'Gapan', 'Munoz', 'Palayan', 'Science City of Munoz'],
+            'CALABARZON (Region IV-A)': ['Calamba', 'Dasmarinas', 'Bacoor', 'Imus', 'Antipolo', 'Binan', 'San Pedro', 'Santa Rosa', 'General Trias', 'Cabuyao'],
+            'MIMAROPA (Region IV-B)': ['Puerto Princesa', 'Calapan', 'Mamburao', 'Boac', 'Romblon', 'Odiongan', 'San Jose', 'Roxas'],
+            'Bicol Region (Region V)': ['Naga', 'Legazpi', 'Iriga', 'Tabaco', 'Ligao', 'Sorsogon City', 'Masbate City', 'Virac', 'Daet'],
+            'Western Visayas (Region VI)': ['Iloilo City', 'Bacolod', 'Roxas', 'Kalibo', 'San Jose de Buenavista', 'Passi', 'Jordan', 'Sagay', 'Cadiz'],
+            'Central Visayas (Region VII)': ['Cebu City', 'Lapu-Lapu', 'Mandaue', 'Tagbilaran', 'Dumaguete', 'Bais', 'Bayawan', 'Talisay', 'Toledo'],
+            'Eastern Visayas (Region VIII)': ['Tacloban', 'Ormoc', 'Calbayog', 'Maasin', 'Catbalogan', 'Baybay', 'Borongan'],
+            'Zamboanga Peninsula (Region IX)': ['Zamboanga City', 'Pagadian', 'Dipolog', 'Dapitan', 'Isabela'],
+            'Northern Mindanao (Region X)': ['Cagayan de Oro', 'Iligan', 'Ozamis', 'Tangub', 'Oroquieta', 'Valencia', 'Malaybalay', 'Gingoog', 'El Salvador'],
+            'Davao Region (Region XI)': ['Davao City', 'Tagum', 'Panabo', 'Island Garden City of Samal', 'Digos', 'Mati'],
+            'SOCCSKSARGEN (Region XII)': ['General Santos', 'Koronadal', 'Kidapawan', 'Tacurong', 'Cotabato City'],
+            'Caraga (Region XIII)': ['Butuan', 'Surigao City', 'Bislig', 'Tandag', 'Bayugan', 'Cabadbaran'],
+            'BARMM': ['Cotabato City', 'Marawi', 'Lamitan', 'Jolo', 'Bongao', 'Isabela City'],
+            'Cordillera Administrative Region (CAR)': ['Baguio', 'Tabuk', 'La Trinidad', 'Bontoc', 'Lagawe', 'Bangued']
+        };
+
+        // Valid values from legend
+        const validValues = {
+            statusACCT: ['A', 'C', 'D'],
+            acctType: ['01', '02'],
+            gender: ['M', 'F'],
+            curc01: [608, 609, 610, 611, 612],
+            channel: ['POS', 'ATM', 'ONL'],
+            device1: ['CPT', 'WEB', 'MOBILE'],
+            tranType: ['WDR', 'FTT', 'INQ'],
+            mfa: ['SMS', 'EML', 'MPN'],
+            fraudFlag: [0, 1],
+            cstat: ['A', 'O'],
+            rmks1: ['ON', 'OFF'],
+            biometric: ['Y', 'N']
+        };
+
+        // Currency mapping
+        const currencyMap = {
+            608: 'PHP',
+            609: 'USD',
+            610: 'EUR',
+            611: 'JPY',
+            612: 'CNY'
+        };
+
+        const currencySymbols = {
+            'PHP': '₱',
+            'USD': '$',
+            'EUR': '€',
+            'JPY': '¥',
+            'CNY': '¥'
+        };
+
+        // Device dependencies
+        const deviceDependencies = {
+            'CPT': { device2: 'NA', deviceOS: 'NA' },
+            'WEB': { device2: 'WEB', deviceOS: ['WIN', 'MAC', 'LNX'] },
+            'MOBILE': { device2: 'MOBILE', deviceOS: ['IOS', 'AND', 'NA'] }
+        };
+
+        // CSTAT dependencies
+        const cstatDependencies = {
+            'A': { rmks1: 'ON', rmks2: 'ON' },
+            'O': { rmks1: 'OFF', rmks2: ['TERMINAL ISSUE', 'ATM OFFLINE', 'NETWORK DOWN', 'SYSTEM MAINTENANCE'] }
+        };
+
+        // Customer database to ensure consistency
+        let customerDatabase = {};
+        let customerIdCounter = 30000000000;
+
+        function generateCustomerID() {
+            return customerIdCounter++;
+        }
+
+        function generateAccountNumber() {
+            return String(Math.floor(Math.random() * 10000000000000000000)).padStart(19, '0');
+        }
+
+        function generateCardNumber() {
+            const prefix = '4539'; // Visa prefix
+            const middle = String(Math.floor(Math.random() * 100000000)).padStart(8, '0');
+            const suffix = String(Math.floor(Math.random() * 10000)).padStart(4, '0');
+            return prefix + middle.substring(0, 6) + '******' + suffix;
+        }
+
+        function generateTransactionID() {
+            return 456780000 + Math.floor(Math.random() * 1000000);
+        }
+
+        function generateTimestamp() {
+            const hours = Math.floor(Math.random() * 24);
+            const minutes = Math.floor(Math.random() * 60);
+            const seconds = Math.floor(Math.random() * 60);
+            return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+        }
+
+        function generateCardDates() {
+            // Card create date: between Jan 1, 2015 and 2022
+            const createYear = 2015 + Math.floor(Math.random() * 8); // 2015-2022
+            const createMonth = Math.floor(Math.random() * 12) + 1;
+            const createDay = Math.floor(Math.random() * 28) + 1;
+            
+            // Card expiry date: must be after create date and not less than Jan 1, 2026
+            const minExpiryYear = Math.max(createYear + 3, 2026); // At least 3 years after creation or 2026, whichever is later
+            const expiryYear = minExpiryYear + Math.floor(Math.random() * 5); // Add 0-4 more years
+            const expiryMonth = Math.floor(Math.random() * 12) + 1;
+            const expiryDay = Math.floor(Math.random() * 28) + 1;
+            
+            return {
+                create: `${createMonth}/${createDay}/${createYear}`,
+                expiry: `${expiryMonth}/${expiryDay}/${expiryYear}`
+            };
+        }
+
+        function formatCurrency(amount, currencyCode) {
+            const currency = currencyMap[currencyCode];
+            const symbol = currencySymbols[currency];
+            // Ensure two decimal places
+            const formattedAmount = parseFloat(amount).toFixed(2);
+            // Add thousands separator
+            const parts = formattedAmount.split('.');
+            parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+            return `${symbol}${parts.join('.')}`;
+        }
+
+        function getRandomElement(arr) {
+            return arr[Math.floor(Math.random() * arr.length)];
+        }
+
+        function generateCustomer() {
+            const gender = getRandomElement(validValues.gender);
+            const firstName = getRandomElement(gender === 'M' ? filipinoFirstNames.male : filipinoFirstNames.female);
+            const surname = getRandomElement(filipinoSurnames);
+            const mi = String.fromCharCode(65 + Math.floor(Math.random() * 26));
+            const region = getRandomElement(Object.keys(regionCityMap));
+            const city = getRandomElement(regionCityMap[region]);
+            const customerID = generateCustomerID();
+            
+            return {
+                customerID,
+                firstName,
+                mi,
+                surname,
+                gender,
+                region,
+                city
+            };
+        }
+
+        function generateRow(customer, fraudRate) {
+            const statusACCT = getRandomElement(validValues.statusACCT);
+            const acctType = getRandomElement(validValues.acctType);
+            const accountNumber = generateAccountNumber();
+            const cardNo = generateCardNumber();
+            const dates = generateCardDates();
+            const curc01 = getRandomElement(validValues.curc01);
+            
+            // Generate amount with 2 decimal places
+            const rawAmount = (Math.random() * 99999 + 100);
+            const transactionAmount = formatCurrency(rawAmount, curc01);
+            
+            const tranID = generateTransactionID();
+            const timestamp = generateTimestamp();
+            const channel = getRandomElement(validValues.channel);
+            const device1 = getRandomElement(validValues.device1);
+            const deviceDep = deviceDependencies[device1];
+            const device2 = deviceDep.device2;
+            const deviceOS = Array.isArray(deviceDep.deviceOS) ? getRandomElement(deviceDep.deviceOS) : deviceDep.deviceOS;
+            const biometric = getRandomElement(validValues.biometric);
+            const tranType = getRandomElement(validValues.tranType);
+            const mfa = getRandomElement(validValues.mfa);
+            
+            // IMPORTANT: If StatusACCT is "C" or "D", then FRAUD_FLAG must be 1
+            let fraudFlag;
+            if (statusACCT === 'C' || statusACCT === 'D') {
+                fraudFlag = 1; // Closed or Dormant accounts are always flagged as fraud
+            } else {
+                // For Active accounts, use the fraud rate
+                fraudFlag = Math.random() * 100 < fraudRate ? 1 : 0;
+            }
+            
+            const cstat = getRandomElement(validValues.cstat);
+            const cstatDep = cstatDependencies[cstat];
+            const rmks1 = cstatDep.rmks1;
+            const rmks2 = Array.isArray(cstatDep.rmks2) ? getRandomElement(cstatDep.rmks2) : cstatDep.rmks2;
+            
+            return {
+                'StatusACCT': statusACCT,
+                'Customer ID': customer.customerID,
+                'System': 'EQU',
+                'AcctType': acctType,
+                'Account Number': accountNumber,
+                'FirstName': customer.firstName,
+                'MI': customer.mi,
+                'SurName': customer.surname,
+                'ADD_CITY': customer.city,
+                'ADD_REGION': customer.region,
+                'COUNTRY': 'PHILIPPINES',
+                'Gender': customer.gender,
+                'CardNo': cardNo,
+                'CardExpiryDate': dates.expiry,
+                'CardCreateDate': dates.create,
+                'CURC01': curc01,
+                'Transaction Amount': transactionAmount,
+                'TRANID': tranID,
+                'TimeStamp': timestamp,
+                'Channel': channel,
+                'Device 1': device1,
+                'Device 2': device2,
+                'DeviceOS': deviceOS,
+                'Biometric': biometric,
+                'TRANTYPE': tranType,
+                'MFA': mfa,
+                'FRAUD_FLAG': fraudFlag,
+                'CSTAT': cstat,
+                'RMKS1': rmks1,
+                'RMKS2': rmks2
+            };
+        }
+
+        function generateData() {
+            const numRows = parseInt(document.getElementById('numRows').value);
+            const fraudRate = parseFloat(document.getElementById('fraudRate').value);
+            const uniqueCustomers = Math.min(parseInt(document.getElementById('uniqueCustomers').value), numRows);
+            
+            // Reset customer database
+            customerDatabase = {};
+            customerIdCounter = 30000000000;
+            
+            // Generate unique customers
+            const customers = [];
+            for (let i = 0; i < uniqueCustomers; i++) {
+                customers.push(generateCustomer());
+            }
+            
+            // Generate data rows
+            generatedData = [];
+            for (let i = 0; i < numRows; i++) {
+                const customer = customers[Math.floor(Math.random() * customers.length)];
+                generatedData.push(generateRow(customer, fraudRate));
+            }
+            
+            // Update statistics
+            updateStats();
+            
+            // Display preview
+            displayPreview();
+            
+            // Enable download button
+            document.getElementById('downloadBtn').disabled = false;
+            
+            console.log('Sample generated data:', generatedData[0]);
+            console.log('Fraud flag distribution:', generatedData.map(r => `${r.StatusACCT}: ${r.FRAUD_FLAG}`).slice(0, 10));
+        }
+
+        function updateStats() {
+            document.getElementById('stats').style.display = 'flex';
+            document.getElementById('totalRecords').textContent = generatedData.length;
+            
+            const uniqueCustomers = new Set(generatedData.map(row => row['Customer ID'])).size;
+            document.getElementById('uniqueCustomersCount').textContent = uniqueCustomers;
+            
+            const fraudCount = generatedData.filter(row => row['FRAUD_FLAG'] === 1).length;
+            document.getElementById('fraudCount').textContent = fraudCount;
+            
+            const activeAccounts = generatedData.filter(row => row['StatusACCT'] === 'A').length;
+            document.getElementById('activeAccounts').textContent = activeAccounts;
+        }
+
+        function displayPreview() {
+            if (generatedData.length === 0) return;
+            
+            const preview = document.getElementById('preview');
+            const table = document.createElement('table');
+            
+            // Create header
+            const thead = document.createElement('thead');
+            const headerRow = document.createElement('tr');
+            Object.keys(generatedData[0]).forEach(key => {
+                const th = document.createElement('th');
+                th.textContent = key;
+                headerRow.appendChild(th);
+            });
+            thead.appendChild(headerRow);
+            table.appendChild(thead);
+            
+            // Create body (show first 10 rows)
+            const tbody = document.createElement('tbody');
+            generatedData.slice(0, 10).forEach(row => {
+                const tr = document.createElement('tr');
+                Object.values(row).forEach(value => {
+                    const td = document.createElement('td');
+                    td.textContent = value;
+                    tr.appendChild(td);
+                });
+                tbody.appendChild(tr);
+            });
+            table.appendChild(tbody);
+            
+            preview.innerHTML = '<h3>Preview (First 10 Records)</h3>';
+            preview.appendChild(table);
+        }
+
+        function downloadExcel() {
+            if (generatedData.length === 0) return;
+            
+            // Create workbook
+            const wb = XLSX.utils.book_new();
+            
+            // Convert data to worksheet
+            const ws = XLSX.utils.json_to_sheet(generatedData);
+            
+            // Add worksheet to workbook
+            XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
+            
+            // Generate file name with timestamp
+            const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
+            const filename = `BI_DataExtract_Test_${timestamp}.xlsx`;
+            
+            // Write file
+            XLSX.writeFile(wb, filename);
+        }
+    </script>
+</body>
+</html>
